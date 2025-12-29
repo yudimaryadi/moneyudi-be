@@ -1,5 +1,8 @@
 FROM node:18-alpine
 
+# Install OpenSSL
+RUN apk add --no-cache openssl
+
 WORKDIR /app
 
 # Copy package files
@@ -9,21 +12,15 @@ COPY prisma ./prisma/
 # Install dependencies
 RUN npm ci --only=production
 
-# Copy source code
-COPY . .
-
 # Generate Prisma client
 RUN npx prisma generate
 
-# Build the application
+# Copy source code
+COPY . .
+
+# Build application
 RUN npm run build
 
-# Expose port
-EXPOSE 3000
+EXPOSE 3001
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/health || exit 1
-
-# Start the application
 CMD ["npm", "run", "start:prod"]
