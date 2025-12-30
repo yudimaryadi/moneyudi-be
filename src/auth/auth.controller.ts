@@ -1,7 +1,6 @@
-import { Controller, Post, Body, ValidationPipe, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, ValidationPipe, UseGuards, Request, Delete } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto } from './auth.dto';
-import { ChangePasswordDto } from './change-password.dto';
+import { LoginDto, RegisterDto, ChangePasswordDto } from './auth.dto';
 import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Controller('auth')
@@ -22,5 +21,11 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   async changePassword(@Request() req, @Body(ValidationPipe) changePasswordDto: ChangePasswordDto) {
     return this.authService.changePassword(req.user.userId, changePasswordDto);
+  }
+
+  @Delete('delete-account')
+  @UseGuards(JwtAuthGuard)
+  async deleteAccount(@Request() req) {
+    return this.authService.deleteAccount(req.user.userId);
   }
 }
