@@ -67,4 +67,51 @@ export class TransactionsService {
       where: { id },
     });
   }
+
+  async search(userId: string, query: string, limit = 20) {
+    return this.prisma.transaction.findMany({
+      where: {
+        userId,
+        note: {
+          contains: query,
+          mode: 'insensitive',
+        },
+      },
+      include: {
+        category: true,
+      },
+      orderBy: { date: 'desc' },
+      take: limit,
+    });
+  }
+
+  async createBulk(userId: string, transactions: CreateTransactionDto[]) {
+    const results: { created: number; failed: number; errors: string[] } = { created: 0, failed: 0, errors: [] };
+    
+    for (const transaction of transactions) {
+      try {
+        await this.create(userId, transaction);
+        results.created++;
+      } catch (error: any) {
+        results.failed++;
+        results.errors.push(error.message);
+      }
+    }
+    
+    return results;
+  }
+
+  async removeBulk(userId: string, transactionIds: string[]) {
+    const deleteResult = await this.prisma.transaction.deleteMany({
+      where: {
+        id: { in: transactionIds },
+        userId,
+      },
+    });
+    
+    return {
+      deleted: deleteResult.count,
+      message: `${deleteResult.count} transactions deleted`,
+    };
+  }
 }

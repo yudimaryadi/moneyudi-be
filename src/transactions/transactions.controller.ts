@@ -33,4 +33,20 @@ export class TransactionsController {
   remove(@Param('id') id: string, @Request() req) {
     return this.transactionsService.remove(id, req.user.userId);
   }
+
+  @Get('search')
+  search(@Request() req, @Query('q') query: string, @Query('limit') limit?: string) {
+    const limitNum = limit ? parseInt(limit) : 20;
+    return this.transactionsService.search(req.user.userId, query, limitNum);
+  }
+
+  @Post('bulk')
+  createBulk(@Request() req, @Body() body: { transactions: CreateTransactionDto[] }) {
+    return this.transactionsService.createBulk(req.user.userId, body.transactions);
+  }
+
+  @Delete('bulk')
+  removeBulk(@Request() req, @Body() body: { transactionIds: string[] }) {
+    return this.transactionsService.removeBulk(req.user.userId, body.transactionIds);
+  }
 }
